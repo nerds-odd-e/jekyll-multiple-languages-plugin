@@ -32,7 +32,7 @@ module Jekyll
         @dest = @dest + "/" + lang
         self.config['baseurl'] = self.config['baseurl'] + "/" + lang
         self.config['lang'] = lang
-        
+
         # exclude folders or files from beeing copied to all the language folders
         exclude_from_localizations = self.config['exclude_from_localizations'] || []
         @exclude = @exclude + exclude_from_localizations
@@ -104,6 +104,11 @@ module Jekyll
         end
         if file !~ /^[a-zA-Z0-9_\/\.-]+$/ || file =~ /\.\// || file =~ /\/\./
           return "Include file '#{file}' contains invalid characters or sequences"
+        end
+
+        Dir.chdir(includes_dir) do
+          choices = Dir['**/*'].reject { |x| File.symlink?(x) }
+          includes_dir = File.join(context.registers[:site].source, '_i18n/en') unless choices.include?(file)
         end
 
         Dir.chdir(includes_dir) do
